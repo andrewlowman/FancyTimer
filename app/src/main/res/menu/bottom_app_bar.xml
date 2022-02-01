@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/intervals_menu_item"
+        android:title="Intervals"
+        android:icon="@drawable/ic_clock"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:title="Stopwatch"
+        android:id="@+id/stopwatch_menu_item"
+        android:icon="@drawable/ic_clock"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:title="Timer"
+        android:id="@+id/timer_menu_item"
+        android:icon="@drawable/ic_alarm"
+        app:showAsAction="ifRoom" />
+</menu>

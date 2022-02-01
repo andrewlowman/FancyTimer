@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="10dp"
+    android:fillViewport="true"
+    android:id="@+id/intervalsPlannerScrollView">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    tools:context=".Activity.IntervalsPlanner"
+        android:id="@+id/intervalsPlannerConstraintLayout">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/intervalsPlannerMinutesTextView"
+        android:text="Minutes"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginLeft="30dp"
+        android:layout_marginTop="30dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/intervalsPlannerSecondsTextView"
+        android:text="Seconds"
+        app:layout_constraintTop_toTopOf="@id/intervalsPlannerMinutesTextView"
+        app:layout_constraintLeft_toRightOf="@id/intervalsPlannerMinutesTextView"
+        android:layout_marginLeft="40dp" />
+
+    <NumberPicker
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/intervalsMinutesNumberPicker"
+        app:layout_constraintLeft_toLeftOf="@id/intervalsPlannerMinutesTextView"
+        app:layout_constraintTop_toBottomOf="@id/intervalsPlannerMinutesTextView"
+        android:layout_marginTop="40dp"/>
+
+    <NumberPicker
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/intervalsSecondsNumberPicker"
+        app:layout_constraintLeft_toLeftOf="@id/intervalsPlannerSecondsTextView"
+        app:layout_constraintTop_toTopOf="@id/intervalsMinutesNumberPicker" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/intervalsPlannerUntimedButton"
+            android:text="Stopwatch"
+            app:layout_constraintTop_toBottomOf="@id/intervalsSecondsNumberPicker"
+            app:layout_constraintRight_toLeftOf="@id/intervalsPlannerAddButton"
+            android:layout_marginRight="10dp" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/intervalsPlannerAddButton"
+        android:text="Add"
+        app:layout_constraintTop_toBottomOf="@id/intervalsSecondsNumberPicker"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginRight="30dp"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/intervalsPlannerSaveButton"
+        android:text="Save"
+        app:layout_constraintTop_toBottomOf="@id/intervalsPlannerEditText"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginRight="30dp"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/intervalsPlannerCancelButton"
+        android:text="Cancel"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/intervalsPlannerEditText"
+        android:layout_marginLeft="30dp" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/intervalsPlannerRecyclerView"
+        app:layout_constraintTop_toBottomOf="@id/intervalsPlannerAddButton"
+        android:layout_marginTop="20dp"/>
+
+        <EditText
+            android:id="@+id/intervalsPlannerEditText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="20dp"
+            android:hint="Interval Title"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/intervalsPlannerRecyclerView" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

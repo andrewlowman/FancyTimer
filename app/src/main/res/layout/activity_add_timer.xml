@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Activity.AddTimer">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/addTimerHoursNumberPickerTextView"
+        android:text="Hours"
+        app:layout_constraintLeft_toLeftOf="@id/addTimerHoursNumberPicker"
+        app:layout_constraintRight_toRightOf="@id/addTimerHoursNumberPicker"
+        app:layout_constraintTop_toTopOf="@id/addTimerMinutesNumberPickerTextView" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/addTimerMinutesNumberPickerTextView"
+        android:text="Minutes"
+        app:layout_constraintLeft_toLeftOf="@id/addTimerMinutesNumberPicker"
+        app:layout_constraintRight_toRightOf="@id/addTimerMinutesNumberPicker"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="60dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/addTimerSecondsNumberPickerTextView"
+        android:text="Seconds"
+        app:layout_constraintTop_toTopOf="@id/addTimerMinutesNumberPickerTextView"
+        app:layout_constraintLeft_toLeftOf="@id/addTimerSecondsNumberPicker"
+        app:layout_constraintRight_toRightOf="@id/addTimerSecondsNumberPicker" />
+
+
+    <NumberPicker
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/addTimerHoursNumberPicker"
+        app:layout_constraintRight_toLeftOf="@id/addTimerMinutesNumberPicker"
+        app:layout_constraintTop_toTopOf="@id/addTimerMinutesNumberPicker"
+        android:layout_marginRight="20dp" />
+
+    <NumberPicker
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/addTimerMinutesNumberPicker"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/addTimerMinutesNumberPickerTextView"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="20dp" />
+
+    <NumberPicker
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/addTimerSecondsNumberPicker"
+        app:layout_constraintLeft_toRightOf="@id/addTimerMinutesNumberPicker"
+        app:layout_constraintTop_toTopOf="@id/addTimerMinutesNumberPicker"
+        android:layout_marginLeft="20dp" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/addTimerAddButton"
+        android:text="ADD"
+        app:layout_constraintLeft_toLeftOf="@id/addTimerSecondsNumberPicker"
+        app:layout_constraintRight_toRightOf="@id/addTimerSecondsNumberPicker"
+        app:layout_constraintTop_toBottomOf="@id/addTimerMinutesNumberPicker"
+        android:layout_margin="20dp" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/addTimerCancelButton"
+        android:text="Cancel"
+        app:layout_constraintTop_toBottomOf="@id/addTimerAddButton"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginTop="30dp"
+        android:layout_marginLeft="30dp" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

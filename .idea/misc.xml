@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DesignSurface">
+    <option name="filePathToZoomLevelMap">
+      <map>
+        <entry key="..\:/Users/low85/AndroidStudioProjects/FancyTimer/app/src/main/res/drawable/selector.xml" value="0.3828125" />
+        <entry key="..\:/Users/low85/AndroidStudioProjects/FancyTimer/app/src/main/res/layout/activity_add_timer.xml" value="0.20520833333333333" />
+        <entry key="..\:/Users/low85/AndroidStudioProjects/FancyTimer/app/src/main/res/layout/activity_intervals.xml" value="0.25" />
+        <entry key="..\:/Users/low85/AndroidStudioProjects/FancyTimer/app/src/main/res/layout/activity_intervals_planner.xml" value="0.20520833333333333" />
+        <entry key="..\:/Users/low85/AndroidStudioProjects/FancyTimer/app/src/main/res/layout/activity_load_timer.xml" value="0.1" />
+        <entry key="..\:/Users/low85/AndroidStudioProjects/FancyTimer/app/src/main/res/layout/activity_stopwatch.xml" value="0.36666666666666664" />
+        <entry key="..\:/Users/low85/AndroidStudioProjects/FancyTimer/app/src/main/res/layout/activity_timer.xml" value="0.36666666666666664" />
+        <entry key="..\:/Users/low85/AndroidStudioProjects/FancyTimer/app/src/main/res/layout/activity_watch.xml" value="0.29797979797979796" />
+        <entry key="..\:/Users/low85/AndroidStudioProjects/FancyTimer/app/src/main/res/layout/anim_flashing_text.xml" value="0.20520833333333333" />
+        <entry key="..\:/Users/low85/AndroidStudioProjects/FancyTimer/app/src/main/res/layout/interval_list_item.xml" value="0.1" />
+        <entry key="..\:/Users/low85/AndroidStudioProjects/FancyTimer/app/src/main/res/layout/interval_list_iten.xml" value="0.20364583333333333" />
+        <entry key="..\:/Users/low85/AndroidStudioProjects/FancyTimer/app/src/main/res/layout/load_interval_list_item.xml" value="0.1" />
+        <entry key="..\:/Users/low85/AndroidStudioProjects/FancyTimer/app/src/main/res/layout/timer_list_item.xml" value="0.36666666666666664" />
+        <entry key="..\:/Users/low85/AndroidStudioProjects/FancyTimer/app/src/main/res/layout/toolbar.xml" value="0.3555253623188406" />
+        <entry key="..\:/Users/low85/AndroidStudioProjects/FancyTimer/app/src/main/res/menu/bottom_app_bar.xml" value="0.36666666666666664" />
+        <entry key="..\:/Users/low85/AndroidStudioProjects/FancyTimer/app/src/main/res/menu/main.xml" value="0.36666666666666664" />
+      </map>
+    </option>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="Android Studio default JDK" project-jdk-type="JavaSDK">
+    <output url="file://$PROJECT_DIR$/build/classes" />
+  </component>
+  <component name="ProjectType">
+    <option name="id" value="Android" />
+  </component>
+</project>
