@@ -10,26 +10,40 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.FancyTimer">
         <activity
+            android:label="Report Details"
+            android:name=".Activity.ReportDetails"
+            android:exported="false" />
+        <activity
+            android:label="Reports"
+            android:name=".Activity.Report"
+            android:exported="false" />
+        <activity
+            android:label="Load Interval"
             android:name=".Activity.LoadInterval"
             android:exported="true" />
         <activity
+            android:label="Add Timer"
             android:name=".Activity.AddTimer"
             android:exported="true" />
         <activity
+            android:label="Stopwatch"
             android:name=".Activity.Watch"
             android:exported="true"
-            android:launchMode="singleTask"/>
+            android:launchMode="singleTask" />
         <activity
+            android:label="Interval Planner"
             android:name=".Activity.IntervalsPlanner"
             android:exported="true" />
         <activity
+            android:label="Timer"
             android:name=".Activity.Timer"
             android:exported="true"
-            android:launchMode="singleTask"/>
+            android:launchMode="singleTask" />
         <activity
             android:name=".MainActivity"
             android:exported="true" />
         <activity
+            android:label="Intervals"
             android:name=".Activity.Intervals"
             android:exported="true"
             android:launchMode="singleTask">

@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 
 import com.andrew_lowman.fancytimer.Entities.IntervalsEntity;
 import com.andrew_lowman.fancytimer.R;
@@ -22,16 +23,18 @@ import com.andrew_lowman.fancytimer.ViewModel.IntervalsViewModel;
 import com.andrew_lowman.fancytimer.ViewModel.SwipeToDelete;
 import com.andrew_lowman.fancytimer.ui.LoadIntervalAdapter;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class LoadInterval extends AppCompatActivity implements LoadIntervalAdapter.LoadIntervalAdapterListener{
 
     private IntervalsViewModel intervalsViewModel;
 
-    private List<IntervalsEntity> intervalTitles;
+    private List<IntervalsEntity> intervals = new ArrayList<>();
 
-    private Button cancelButton;
-    private Button deleteButton;
+    private Button searchButton;
+    private EditText searchBox;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,8 +44,8 @@ public class LoadInterval extends AppCompatActivity implements LoadIntervalAdapt
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
 
-        cancelButton = findViewById(R.id.loadIntervalCancelButton);
-        deleteButton = findViewById(R.id.loadIntervalDeleteButton);
+        searchButton = findViewById(R.id.loadTimerSearchButton);
+        searchBox = findViewById(R.id.loadTimerSearchBox);
 
         intervalsViewModel = new ViewModelProvider(this).get(IntervalsViewModel.class);
 
@@ -57,21 +60,18 @@ public class LoadInterval extends AppCompatActivity implements LoadIntervalAdapt
             @Override
             public void onChanged(List<IntervalsEntity> intervalsEntities) {
                 loadIntervalAdapter.setIntervalTitles(intervalsEntities);
+                intervals.addAll(intervalsEntities);
             }
         });
 
         loadIntervalAdapter.notifyDataSetChanged();
 
-        cancelButton.setOnClickListener(new View.OnClickListener() {
+        searchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                finish();
-            }
-        });
-
-        deleteButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+                String text = searchBox.getText().toString();
+                loadIntervalAdapter.setIntervalTitles(searchIntervals(text,intervals));
+                loadIntervalAdapter.notifyDataSetChanged();
 
             }
         });
@@ -92,7 +92,24 @@ public class LoadInterval extends AppCompatActivity implements LoadIntervalAdapt
         Intent intent = new Intent(LoadInterval.this,Intervals.class);
         intent.putExtra("name", ie.getName());
         intent.putExtra("code",ie.getCode());
+        intent.putExtra("intervalID", ie.getIntervalID());
         setResult(Activity.RESULT_OK,intent);
         finish();
+    }
+
+    public List<IntervalsEntity> searchIntervals(String text,List<IntervalsEntity> intervalsEntityList){
+        //check if searchbox is empty -whole list
+        if(text.isEmpty()){
+            return intervalsEntityList;
+        }
+        //new list to fill
+        List<IntervalsEntity> newList = new ArrayList<>();
+        //thru list and check if name or id contains search term
+        for(IntervalsEntity ie:intervalsEntityList){
+            if(ie.getName().toLowerCase(Locale.ROOT).contains(text.toLowerCase(Locale.ROOT))||Integer.toString(ie.getIntervalID()).toLowerCase(Locale.ROOT).contains(text.toLowerCase(Locale.ROOT))){
+                newList.add(ie);
+            }
+        }
+        return newList;
     }
 }

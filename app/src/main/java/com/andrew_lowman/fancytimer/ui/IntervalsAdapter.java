@@ -2,6 +2,7 @@ package com.andrew_lowman.fancytimer.ui;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.view.ContentInfo;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +16,7 @@ import androidx.room.ColumnInfo;
 import com.andrew_lowman.fancytimer.Activity.Intervals;
 import com.andrew_lowman.fancytimer.R;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class IntervalsAdapter extends RecyclerView.Adapter<IntervalsAdapter.IntervalsViewHolder> {
@@ -22,6 +24,7 @@ public class IntervalsAdapter extends RecyclerView.Adapter<IntervalsAdapter.Inte
     private final LayoutInflater layoutInflater;
     private final Context context;
     private List<String> times;
+    private List<String> originalTimes = new ArrayList<>();
 
     private int selectedPos = RecyclerView.NO_POSITION;
     private int prevPos = RecyclerView.NO_POSITION;
@@ -37,7 +40,6 @@ public class IntervalsAdapter extends RecyclerView.Adapter<IntervalsAdapter.Inte
         public IntervalsViewHolder(@NonNull View itemView) {
             super(itemView);
             timeText = itemView.findViewById(R.id.intervalListItemTextView);
-
         }
     }
 
@@ -54,9 +56,15 @@ public class IntervalsAdapter extends RecyclerView.Adapter<IntervalsAdapter.Inte
             String current = times.get(position);
             holder.timeText.setText(current);
             if(position == selectedPos){
-                holder.itemView.setBackgroundColor(Color.GREEN);
+                //holder.itemView.setBackgroundColor(Color.GREEN);
+                //holder.timeText.setTextColor(Color.GREEN);
+                holder.timeText.setTextSize(25);
+                holder.timeText.setTypeface(null, Typeface.BOLD);
             }else{
-                holder.itemView.setBackgroundColor(Color.TRANSPARENT);
+                //holder.timeText.setTextColor(Color.BLACK);
+                holder.timeText.setTextSize(18);
+                holder.timeText.setTypeface(null, Typeface.NORMAL);
+                //holder.itemView.setBackgroundColor(Color.TRANSPARENT);
             }
         }else{
             holder.timeText.setText("None");
@@ -74,18 +82,33 @@ public class IntervalsAdapter extends RecyclerView.Adapter<IntervalsAdapter.Inte
 
     public void setTimes(List<String> newTimes){
         times = newTimes;
+        originalTimes.clear();
+        originalTimes.addAll(newTimes);
         notifyDataSetChanged();
     }
-
-    /*@Override
-    public void highlightEntry(int entry) {
-        selectedPos = entry;
-    }*/
 
     public void setBackground(int entryNumber){
         selectedPos = entryNumber;
         notifyItemChanged(prevPos);
         notifyItemChanged(selectedPos);
         prevPos = selectedPos;
+    }
+
+    public void updateStopWatchEntry(int index, String updateTime){
+        String placeholder = times.get(index);
+        times.set(index,placeholder + "     " + updateTime);
+        notifyItemChanged(index);
+    }
+
+    public void resetTimes(){
+        if(times != null){
+            times.clear();
+            times.addAll(originalTimes);
+            notifyDataSetChanged();
+        }
+    }
+
+    public List<String> retrieveTimes(){
+        return times;
     }
 }

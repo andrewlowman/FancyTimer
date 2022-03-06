@@ -15,7 +15,8 @@ public class IntervalsEntity {
 
     private String code;
 
-    public IntervalsEntity(String name, String code){
+    public IntervalsEntity(int intervalID, String name, String code) {
+        this.intervalID = intervalID;
         this.name = name;
         this.code = code;
     }

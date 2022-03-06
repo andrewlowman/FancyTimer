@@ -20,7 +20,8 @@
         android:text="00:00"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        android:textSize="40sp"/>
 
     <View
         android:id="@+id/topDivider"
@@ -47,16 +48,17 @@
         android:text="Interval"
         app:layout_constraintLeft_toRightOf="@id/startButton"
         app:layout_constraintTop_toTopOf="@id/startButton"
-        android:layout_marginLeft="20dp" />
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="10dp"/>
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/cancelButton"
-        android:text="Cancel"
+        android:text="Reset"
         app:layout_constraintTop_toTopOf="@id/startButton"
         app:layout_constraintRight_toLeftOf="@id/startButton"
-        android:layout_marginRight="20dp" />
+        android:layout_marginRight="15dp" />
 
 
     <TextView

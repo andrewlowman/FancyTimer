@@ -3,6 +3,7 @@ package com.andrew_lowman.fancytimer.Activity;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -13,6 +14,7 @@ import android.content.ClipData;
 import android.content.Intent;
 import android.icu.text.SimpleDateFormat;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Parcelable;
 import android.view.MenuItem;
 import android.view.View;
@@ -37,8 +39,9 @@ import java.util.Locale;
 public class IntervalsPlanner extends AppCompatActivity {
     private Button addButton;
     private Button saveButton;
-    private Button cancelButton;
     private Button untimedButton;
+    private Button quickFiveButton;
+    private Button quickTenButton;
     private EditText nameEditText;
 
     private NumberPicker minsNP;
@@ -52,7 +55,7 @@ public class IntervalsPlanner extends AppCompatActivity {
 
     private IntervalsViewModel intervalsViewModel;
 
-    private int idNumber;
+    private int idNumber = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,9 +64,10 @@ public class IntervalsPlanner extends AppCompatActivity {
 
         addButton = findViewById(R.id.intervalsPlannerAddButton);
         saveButton = findViewById(R.id.intervalsPlannerSaveButton);
-        cancelButton = findViewById(R.id.intervalsPlannerCancelButton);
         untimedButton = findViewById(R.id.intervalsPlannerUntimedButton);
         nameEditText = findViewById(R.id.intervalsPlannerEditText);
+        quickFiveButton = findViewById(R.id.intervalsPlannerQuickFiveButton);
+        quickTenButton = findViewById(R.id.intervalsPlannerQuickTenButton);
 
         minsNP = findViewById(R.id.intervalsMinutesNumberPicker);
         secsNP = findViewById(R.id.intervalsSecondsNumberPicker);
@@ -92,6 +96,26 @@ public class IntervalsPlanner extends AppCompatActivity {
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new IntervalsPlannerSwipeToDelete(intervalsPlannerAdapter));
         itemTouchHelper.attachToRecyclerView(recyclerView);
 
+        intervalsViewModel.getAllIntervals().observe(this, new Observer<List<IntervalsEntity>>() {
+            @Override
+            public void onChanged(List<IntervalsEntity> intervalsEntities) {
+                storedIntervals.addAll(intervalsEntities);
+            }
+        });
+
+        //produce id number/take last entry in db and use that id number plus one
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if(storedIntervals.size() > 0){
+                    int position = storedIntervals.size() - 1;
+                    IntervalsEntity ie = storedIntervals.get(position);
+                    idNumber = ie.getIntervalID() + 1;
+                    //System.out.println("Idnumber: " + idNumber);
+                }
+            }
+        },1000);
+
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -105,13 +129,6 @@ public class IntervalsPlanner extends AppCompatActivity {
             }
         });
 
-        cancelButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
-
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -122,13 +139,17 @@ public class IntervalsPlanner extends AppCompatActivity {
                 }else{
                     title = nameEditText.getText().toString();
                 }
-                IntervalsEntity ie = new IntervalsEntity(title,converToString(timesToSend));
-                intervalsViewModel.insert(ie);
-                Intent intent = new Intent(IntervalsPlanner.this,Intervals.class);
-                intent.putExtra("StringTimesArray", (Serializable) times);
-                intent.putExtra("LongTimesArray", (Serializable) timesToSend);
-                setResult(Activity.RESULT_OK,intent);
-                finish();
+                if(!times.isEmpty()){
+                    IntervalsEntity ie = new IntervalsEntity(idNumber,title,converToString(timesToSend));
+                    intervalsViewModel.insert(ie);
+                    Intent intent = new Intent(IntervalsPlanner.this,Intervals.class);
+                    intent.putExtra("StringTimesArray", (Serializable) times);
+                    intent.putExtra("LongTimesArray", (Serializable) timesToSend);
+                    intent.putExtra("intervalID",idNumber);
+                    intent.putExtra("name",title);
+                    setResult(Activity.RESULT_OK,intent);
+                    finish();
+                }
             }
         });
 
@@ -138,6 +159,20 @@ public class IntervalsPlanner extends AppCompatActivity {
                 timesToSend.add(0L);
                 times.add("Stopwatch");
                 intervalsPlannerAdapter.notifyDataSetChanged();
+            }
+        });
+
+        quickFiveButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                minsNP.setValue(minsNP.getValue()+ 5);
+            }
+        });
+
+        quickTenButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                minsNP.setValue(minsNP.getValue() + 10);
             }
         });
 

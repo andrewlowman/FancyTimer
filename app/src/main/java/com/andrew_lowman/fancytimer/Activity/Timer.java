@@ -15,6 +15,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
@@ -47,6 +48,8 @@ public class Timer extends AppCompatActivity implements Clock {
     private MediaPlayer mp;
 
     private CountDownTimer ct;
+
+    private ActivityResultLauncher<Intent> loadRingtoneActivityLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,6 +105,21 @@ public class Timer extends AppCompatActivity implements Clock {
                         }
                     }
                 });
+
+        loadRingtoneActivityLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                new ActivityResultCallback<ActivityResult>() {
+                    @Override
+                    public void onActivityResult(ActivityResult result) {
+                        if(result.getResultCode() == Activity.RESULT_OK){
+                            Intent intent = result.getData();
+                            Uri uri = intent.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
+                            mp = MediaPlayer.create(getApplicationContext(),uri);
+
+                        }
+                    }
+                }
+        );
 
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -222,5 +240,28 @@ public class Timer extends AppCompatActivity implements Clock {
         }else{
             return String.format(Locale.getDefault(), "%02d:%02d:%02d:%03d", hours, minutes, secs, mils);
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_stopwatch, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item){
+        int id = item.getItemId();
+
+        if(id == R.id.stopwatchRingtoneMenuItem){
+            Intent loadRingtone = new Intent(RingtoneManager.ACTION_RINGTONE_PICKER);
+            loadRingtone.putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE,"Select alert tone");
+            loadRingtone.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true);
+            loadRingtone.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, true);
+            loadRingtone.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_NOTIFICATION);
+            loadRingtoneActivityLauncher.launch(loadRingtone);
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 }

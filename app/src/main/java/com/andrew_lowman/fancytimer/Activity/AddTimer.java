@@ -21,7 +21,6 @@ public class AddTimer extends AppCompatActivity {
     private NumberPicker npSeconds;
 
     private Button addButton;
-    private Button cancelButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,7 +32,6 @@ public class AddTimer extends AppCompatActivity {
         npSeconds = findViewById(R.id.addTimerSecondsNumberPicker);
 
         addButton = findViewById(R.id.addTimerAddButton);
-        cancelButton = findViewById(R.id.addTimerCancelButton);
 
         npHours.setMaxValue(99);
         npHours.setMinValue(0);
@@ -50,21 +48,18 @@ public class AddTimer extends AppCompatActivity {
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                long pickedHours = npHours.getValue() * 3600000L;
-                long pickedMinutes = npMinutes.getValue() * 60000L;
-                long pickedSeconds = npSeconds.getValue() * 1000L;
-                long millis = pickedHours + pickedMinutes + pickedSeconds;
-                Intent intent = new Intent(AddTimer.this,Timer.class);
-                intent.putExtra("Milliseconds",millis);
-                setResult(Activity.RESULT_OK,intent);
-                finish();
-            }
-        });
+                if(npHours.getValue() == 0 && npMinutes.getValue() == 0 && npSeconds.getValue() == 0){
 
-        cancelButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
+                }else{
+                    long pickedHours = npHours.getValue() * 3600000L;
+                    long pickedMinutes = npMinutes.getValue() * 60000L;
+                    long pickedSeconds = npSeconds.getValue() * 1000L;
+                    long millis = pickedHours + pickedMinutes + pickedSeconds;
+                    Intent intent = new Intent(AddTimer.this,Timer.class);
+                    intent.putExtra("Milliseconds",millis);
+                    setResult(Activity.RESULT_OK,intent);
+                    finish();
+                }
             }
         });
     }

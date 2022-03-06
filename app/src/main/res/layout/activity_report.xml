@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/loadTimerScrollView"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
@@ -14,32 +13,31 @@
         android:layout_height="wrap_content">
 
         <EditText
-            android:id="@+id/loadTimerSearchBox"
+            android:id="@+id/loadReportSearchBox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="30dp"
             android:hint="Name or ID "
             android:minHeight="48dp"
-            app:layout_constraintRight_toLeftOf="@id/loadTimerSearchButton"
+            app:layout_constraintRight_toLeftOf="@id/loadReportSearchButton"
             app:layout_constraintTop_toTopOf="parent" />
 
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/loadTimerSearchButton"
+            android:id="@+id/loadReportSearchButton"
             android:text="Enter"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="@id/loadTimerSearchBox"
+            app:layout_constraintTop_toTopOf="@id/loadReportSearchBox"
             android:layout_marginRight="20dp" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/loadTimerRecyclerView"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/loadTimerSearchBox"
-            android:layout_marginTop="10dp"
-            android:padding="5dp"/>
+    <androidx.recyclerview.widget.RecyclerView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/reportRecyclerView"
+        android:layout_marginTop="10dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/loadReportSearchBox"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

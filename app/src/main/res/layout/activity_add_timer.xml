@@ -50,8 +50,7 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/addTimerMinutesNumberPickerTextView"
-        android:layout_marginTop="10dp"
-        android:layout_marginLeft="20dp" />
+        android:layout_marginTop="10dp" />
 
     <NumberPicker
         android:layout_width="wrap_content"
@@ -65,21 +64,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/addTimerAddButton"
-        android:text="ADD"
+        android:text="Save"
         app:layout_constraintLeft_toLeftOf="@id/addTimerSecondsNumberPicker"
         app:layout_constraintRight_toRightOf="@id/addTimerSecondsNumberPicker"
         app:layout_constraintTop_toBottomOf="@id/addTimerMinutesNumberPicker"
         android:layout_margin="20dp" />
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/addTimerCancelButton"
-        android:text="Cancel"
-        app:layout_constraintTop_toBottomOf="@id/addTimerAddButton"
-        app:layout_constraintLeft_toLeftOf="parent"
-        android:layout_marginTop="30dp"
-        android:layout_marginLeft="30dp" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

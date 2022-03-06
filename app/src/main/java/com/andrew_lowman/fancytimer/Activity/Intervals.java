@@ -7,11 +7,15 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Paint;
+import android.icu.text.SimpleDateFormat;
 import android.media.MediaPlayer;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -27,8 +31,12 @@ import android.view.animation.Animation;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.andrew_lowman.fancytimer.Entities.IntervalsEntity;
+import com.andrew_lowman.fancytimer.Entities.ReportEntity;
 import com.andrew_lowman.fancytimer.Model.Clock;
 import com.andrew_lowman.fancytimer.R;
+import com.andrew_lowman.fancytimer.ViewModel.IntervalsViewModel;
+import com.andrew_lowman.fancytimer.ViewModel.ReportsViewModel;
 import com.andrew_lowman.fancytimer.ui.IntervalsAdapter;
 import com.google.android.material.bottomappbar.BottomAppBar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -37,6 +45,7 @@ import com.google.android.material.navigation.NavigationBarView;
 import com.google.android.material.navigation.NavigationView;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -46,19 +55,20 @@ public class Intervals extends AppCompatActivity implements Clock, Animation.Ani
     private long originalTime;
     private boolean running = false;
     private boolean started = false;
-    private boolean loaded = false;
+    private boolean timerReady = false;
 
     private Button startButton;
     private Button loadButton;
     private Button resetButton;
     private Button newButton;
     private Button ringtoneButton;
+    private Button reportButton;
 
     private TextView countdownTextView;
+    private TextView nameTextView;
 
     private List<Long> longTimes = new ArrayList<>();
     private List<String> stringTimes = new ArrayList<>();
-    private List<Character> instructions = new ArrayList<>();
     private int n = 0;
 
     private List<CountDownTimer> timers = new ArrayList<>();
@@ -80,6 +90,18 @@ public class Intervals extends AppCompatActivity implements Clock, Animation.Ani
     private int longTimesCounter = 0;
     private int timersCounter = 0;
     private boolean stopwatch = false;
+    private boolean timerStarted = false;
+
+    private int intervalID;
+    private int reportID = 0;
+    private String intervalName = "";
+
+    private ReportsViewModel reportsViewModel;
+    private List<ReportEntity> reports = new ArrayList<>();
+    private List<IntervalsEntity> intervals = new ArrayList<>();
+
+    private ActivityResultLauncher<Intent> loadRingtoneActivityLauncher;
+    private ActivityResultLauncher<Intent> loadIntervalActivityLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,13 +109,31 @@ public class Intervals extends AppCompatActivity implements Clock, Animation.Ani
         setContentView(R.layout.activity_intervals);
 
         countdownTextView = findViewById(R.id.countdownTextView);
+        nameTextView = findViewById(R.id.intervalsNameTextView);
+        nameTextView.setVisibility(View.INVISIBLE);
 
         startButton = findViewById(R.id.intervalStartButton);
-        loadButton = findViewById(R.id.intervalLoadButton);
+        //loadButton = findViewById(R.id.intervalLoadButton);
         resetButton = findViewById(R.id.intervalResetButton);
         newButton = findViewById(R.id.intervalNewButton);
-        ringtoneButton = findViewById(R.id.intervalRingtoneButton);
+        //ringtoneButton = findViewById(R.id.intervalRingtoneButton);
+        //reportButton = findViewById(R.id.intervalRunReportButton);
 
+        reportsViewModel = new ViewModelProvider(this).get(ReportsViewModel.class);
+        reportsViewModel.getAllReports().observe(this, new Observer<List<ReportEntity>>() {
+            @Override
+            public void onChanged(List<ReportEntity> reportEntities) {
+                reports.addAll(reportEntities);
+            }
+        });
+
+        IntervalsViewModel intervalsViewModel = new ViewModelProvider(this).get(IntervalsViewModel.class);
+        intervalsViewModel.getAllIntervals().observe(this, new Observer<List<IntervalsEntity>>() {
+            @Override
+            public void onChanged(List<IntervalsEntity> intervalsEntityList) {
+                intervals.addAll(intervalsEntityList);
+            }
+        });
         NavigationBarView navigationView = findViewById(R.id.bottomNavigation);
         navigationView.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
             @Override
@@ -129,7 +169,6 @@ public class Intervals extends AppCompatActivity implements Clock, Animation.Ani
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setAdapter(intervalsAdapter);
-        //mListener = intervalsAdapter;
 
         ActivityResultLauncher<Intent> newIntervalActivityLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
@@ -141,24 +180,29 @@ public class Intervals extends AppCompatActivity implements Clock, Animation.Ani
 
                             stringTimes = (List<String>) intent.getSerializableExtra("StringTimesArray");
                             longTimes = (List<Long>) intent.getSerializableExtra("LongTimesArray");
+                            intervalID = intent.getIntExtra("intervalID", 0);
+                            intervalName = intent.getStringExtra("name");
+                            //System.out.println("IntervalID: " + intervalID);
                             originalTime = longTimes.get(n);
-                            loaded = true;
+                            timerReady = true;
 
                             loadTimers();
 
                             //copy timers for reset
+                            backupTimers.clear();
                             backupTimers.addAll(timers);
 
                             //have to put these in here to load recycler
                             intervalsAdapter.setTimes(stringTimes);
                             countdownTextView.setText(convert(originalTime));
-
-
+                            nameTextView.setText(intervalName);
+                            nameTextView.setPaintFlags(nameTextView.getPaintFlags() |  Paint.UNDERLINE_TEXT_FLAG);
+                            nameTextView.setVisibility(View.VISIBLE);
                         }
                     }
                 });
 
-        ActivityResultLauncher<Intent> loadIntervalActivityLauncher = registerForActivityResult(
+        loadIntervalActivityLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 new ActivityResultCallback<ActivityResult>() {
                     @Override
@@ -167,24 +211,29 @@ public class Intervals extends AppCompatActivity implements Clock, Animation.Ani
                             Intent intent = result.getData();
                             longTimes = getLongFromString(intent.getStringExtra("code"));
                             stringTimes = convertLongListToString(longTimes);
+                            intervalID = intent.getIntExtra("intervalID", 0);
+                            intervalName = intent.getStringExtra("name");
                             originalTime = longTimes.get(n);
-                            loaded = true;
+                            timerReady = true;
 
                             loadTimers();
 
+                            //need a second array since restarting a timer alters it
+                            backupTimers.clear();
                             backupTimers.addAll(timers);
 
                             //have to put these in here to load recycler
                             intervalsAdapter.setTimes(stringTimes);
                             countdownTextView.setText(convert(originalTime));
-
-
+                            nameTextView.setText(intervalName);
+                            nameTextView.setPaintFlags(nameTextView.getPaintFlags() |  Paint.UNDERLINE_TEXT_FLAG);
+                            nameTextView.setVisibility(View.VISIBLE);
                         }
                     }
                 }
         );
 
-        ActivityResultLauncher<Intent> loadRingtoneActivityLauncher = registerForActivityResult(
+        loadRingtoneActivityLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 new ActivityResultCallback<ActivityResult>() {
                     @Override
@@ -194,7 +243,7 @@ public class Intervals extends AppCompatActivity implements Clock, Animation.Ani
                             Uri uri = intent.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
                             mp = MediaPlayer.create(getApplicationContext(),uri);
 
-                            loaded = true;
+                            timerReady = true;
                             timers.clear();
 
                             for(int i=0; i<longTimes.size(); i++){
@@ -207,18 +256,10 @@ public class Intervals extends AppCompatActivity implements Clock, Animation.Ani
 
                                     @Override
                                     public void onFinish() {
-                                        if(n<timers.size()){
-                                            ct = timers.get(n);
-                                            ct.start();
-                                        }else{
-                                            loaded = false;
-                                        }
                                         countdownTextView.setText("00:00:000");
                                         countdownTextView.startAnimation(blinkingAnimation);
-                                        intervalsAdapter.setBackground(n);
                                         mp.start();
-                                        n++;
-
+                                        runTheLoop();
                                     }
                                 });
                             }
@@ -230,7 +271,7 @@ public class Intervals extends AppCompatActivity implements Clock, Animation.Ani
         /*startButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(loaded) {
+                if(timerReady) {
                     if (startButton.getText().toString().equals("Start")) {
                         if (running) {
                             start(milliseconds);
@@ -250,29 +291,63 @@ public class Intervals extends AppCompatActivity implements Clock, Animation.Ani
             }
         });*/
 
+        /*startButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(timerReady) {
+                    if (running) {
+                        //if running and is a stopwatch - stop stopwatch and next in loop
+                        if(stopwatch){
+                            stopwatchCancel();
+                            runTheLoop();
+                            //if running and not a stopwatch - pause/set text to start
+                        }else{
+                            pause();
+                            startButton.setText("Start");
+                        }
+                        //if not running but has been started and is not stopwatch -  restart
+                    } else if(started){
+                        if(!stopwatch){
+                            start(milliseconds);
+                        }
+                        //if not started - run loop started is true
+                    }else{
+                        runTheLoop();
+                        started = true;
+                    }
+                    if (originalTime > 0) {
+                        startButton.setText("Pause");
+                    }
+                }
+            }
+        });*/
+
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(loaded) {
-                    if(running){
-                        pause();
-                        startButton.setText("Pause");
-                    }
-                    if (startButton.getText().toString().equals("Start")) {
-                        if(stopwatch = true){
+                if(timerReady) {
+                    //if not started
+                    if(!started){
+                        runTheLoop();
+                    }else{
+                        //if started
+                        if(stopwatch){
+                            //stopwatch starts auto doesnt need a button only stops and isnt pausable
+                            stopwatchCancel();
                             runTheLoop();
-                            stopwatch = false;
                         }else{
-                            start();
-                            running = true;
+                            //if timer is running pause the timer
+                            if(running){
+                                pause();
+                                running = false;
+                                startButton.setText("Start");
+                                //if timer not running restart
+                            }else {
+                                start(milliseconds);
+                                running = true;
+                                startButton.setText("Pause");
+                            }
                         }
-
-                        if (originalTime > 0) {
-                            startButton.setText("Pause");
-                        }
-                    } else if (startButton.getText().toString().equals("Pause")) {
-                        pause();
-                        startButton.setText("Start");
                     }
                 }
             }
@@ -281,36 +356,36 @@ public class Intervals extends AppCompatActivity implements Clock, Animation.Ani
         resetButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                cancel();
-                loaded = true;
-                timers.clear();
-                timers.addAll(backupTimers);
+                resetEverything();
+                intervalsAdapter.resetTimes();
             }
         });
 
-        loadButton.setOnClickListener(new View.OnClickListener() {
+        /*loadButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                cancel();
+                resetEverything();
+                intervalsAdapter.resetTimes();
                 Intent loadTimer = new Intent(Intervals.this,LoadInterval.class);
                 loadIntervalActivityLauncher.launch(loadTimer);
-                //startActivity(loadTimer);
             }
-        });
+        });*/
 
         newButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                cancel();
+                resetEverything();
+                intervalsAdapter.resetTimes();
                 Intent intent = new Intent(Intervals.this,IntervalsPlanner.class);
                 newIntervalActivityLauncher.launch(intent);
             }
         });
 
-        ringtoneButton.setOnClickListener(new View.OnClickListener() {
+        /*ringtoneButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                cancel();
+                resetEverything();
+                intervalsAdapter.resetTimes();
                 Intent loadRingtone = new Intent(RingtoneManager.ACTION_RINGTONE_PICKER);
                 loadRingtone.putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE,"Select alert tone");
                 loadRingtone.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true);
@@ -319,6 +394,15 @@ public class Intervals extends AppCompatActivity implements Clock, Animation.Ani
                 loadRingtoneActivityLauncher.launch(loadRingtone);
             }
         });
+
+        reportButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Intervals.this,Report.class);
+                intent.putExtra("intervalID",intervalID);
+                startActivity(intent);
+            }
+        });*/
 
         /*bottomAppBar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
@@ -353,6 +437,8 @@ public class Intervals extends AppCompatActivity implements Clock, Animation.Ani
     @Override
     public void start(long timer) {
         //replace current timer running so it can pick up where it stopped w/o restarting
+        //countdown one to get to current timer running
+        timersCounter--;
         timers.remove(timersCounter);
         timers.add(timersCounter,new CountDownTimer(timer,1) {
             @Override
@@ -365,14 +451,14 @@ public class Intervals extends AppCompatActivity implements Clock, Animation.Ani
             public void onFinish() {
                 countdownTextView.setText("00:00:000");
                 countdownTextView.startAnimation(blinkingAnimation);
-                intervalsAdapter.setBackground(n);
                 mp.start();
                 runTheLoop();
-                timersCounter++;
             }
         });
         ct = timers.get(timersCounter);
         ct.start();
+        //add one to get to where it was
+        timersCounter++;
     }
 
     @Override
@@ -389,7 +475,6 @@ public class Intervals extends AppCompatActivity implements Clock, Animation.Ani
             countdownTextView.setText(convert(originalTime));
             startButton.setText("Start");
         }
-
     }
 
     public String convert(long time){
@@ -419,7 +504,11 @@ public class Intervals extends AppCompatActivity implements Clock, Animation.Ani
     public List<String> convertLongListToString(List<Long> longList){
         List<String> strings = new ArrayList<>();
         for(long l:longList){
-            strings.add(convertToMinutesSeconds(l));
+            if(l==0L){
+                strings.add("Stopwatch");
+            }else{
+                strings.add(convertToMinutesSeconds(l));
+            }
         }
 
         return strings;
@@ -472,10 +561,9 @@ public class Intervals extends AppCompatActivity implements Clock, Animation.Ani
                     public void onFinish() {
                         countdownTextView.setText("00:00:000");
                         countdownTextView.startAnimation(blinkingAnimation);
-                        intervalsAdapter.setBackground(longTimesCounter + 1);
                         mp.start();
                         runTheLoop();
-                        timersCounter++;
+
                     }
                 });
             }
@@ -484,13 +572,18 @@ public class Intervals extends AppCompatActivity implements Clock, Animation.Ani
 
     public void stopwatchCancel(){
         mFirstHandler.removeCallbacks(mainRunnable);
+        intervalsAdapter.updateStopWatchEntry(longTimesCounter - 1,countdownTextView.getText().toString());
         countdownTextView.setText("00:00:000");
         milliseconds = 0L;
         startTime = 0L;
         updateTime = 0L;
         currentTime = 0L;
-        startButton.setText(convert(originalTime));
+        startButton.setText("Start");
         running = false;
+        stopwatch = false;
+        if(longTimesCounter >= longTimes.size()){
+            timerReady = false;
+        }
     }
 
     public void stopwatchStart(){
@@ -499,24 +592,76 @@ public class Intervals extends AppCompatActivity implements Clock, Animation.Ani
         currentTime += milliseconds;
         stopwatch = true;
         startButton.setText("Interval");
+        running = true;
     }
 
     public void stopwatchPause(){
         mFirstHandler.removeCallbacks(mainRunnable);
     }
 
+    /*public void runTheLoop(){
+        if(longTimesCounter < longTimes.size()){
+            if(longTimes.get(longTimesCounter)==0){
+                stopwatchStart();
+                startButton.setText("Next");
+            }else{
+                if(timersCounter < timers.size()){
+                    stopwatch = false;
+                    ct = timers.get(timersCounter);
+                    ct.start();
+                    running = true;
+                    startButton.setText("Pause");
+                }
+            }
+            intervalsAdapter.setBackground(longTimesCounter);
+            longTimesCounter++;
+        }
+    }*/
+
+    //trying to keep running through the arrays in one method
     public void runTheLoop(){
         if(longTimesCounter < longTimes.size()){
             if(longTimes.get(longTimesCounter)==0){
                 stopwatchStart();
             }else{
-                ct = timers.get(timersCounter);
-                ct.start();
+                if(timersCounter < timers.size()){
+                    ct = timers.get(timersCounter);
+                    ct.start();
+                    running = true;
+                    startButton.setText("Pause");
+                    timersCounter++;
+                }
             }
+            started = true;
             intervalsAdapter.setBackground(longTimesCounter);
             longTimesCounter++;
+        }else{
+            timerReady = false;
+            adaptTimes(intervalsAdapter.retrieveTimes());
         }
+    }
 
+    public void resetEverything(){
+        try{
+            ct.cancel();
+        }catch (Exception e){
+
+        }
+        mFirstHandler.removeCallbacks(mainRunnable);
+        milliseconds = 0L;
+        startTime = 0L;
+        updateTime = 0L;
+        currentTime = 0L;
+        stopwatch = false;
+        running = false;
+        started = false;
+        timerReady = true;
+        timers.clear();
+        timers.addAll(backupTimers);
+        timersCounter = 0;
+        longTimesCounter = 0;
+        countdownTextView.setText(convert(originalTime));
+        startButton.setText("Start");
     }
 
     Runnable mainRunnable = new Runnable() {
@@ -537,6 +682,82 @@ public class Intervals extends AppCompatActivity implements Clock, Animation.Ani
             mFirstHandler.postDelayed(this, 0);
         }
     };
+
+    public void adaptTimes(List<String> stringTimes){
+        //count to check if there is a report
+        int count = 0;
+        //string for interval name
+        String name = "";
+        //add date to start of string with an a to id it
+        String date = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+        String newString = "";
+        newString += "a" + date + ",";
+        for(int i = 0;i<stringTimes.size();i++){
+            newString += stringTimes.get(i) + ",";
+        }
+
+        for(IntervalsEntity ie:intervals){
+            if(ie.getIntervalID()==intervalID){
+                name = ie.getName();
+            }
+        }
+        if(reports.size() > 0){
+            for(ReportEntity re:reports){
+                if(re.getFkIntervalID()==intervalID){
+                    count++;
+                    reportsViewModel.updateTimesRun(re.getReportID(),re.getNumberOfTimesRun() + 1);
+                    String time = re.getReportCode() + newString;
+                    reportsViewModel.updateReport(re.getReportID(),time);
+                    //System.out.println("Count == 1");
+                }
+            }
+        }
+        if(count==0){
+            reportsViewModel.insertReport(new ReportEntity(intervalID,name,newString,1));
+            //System.out.println("Count == 0");
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_intervals, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item){
+        int id = item.getItemId();
+
+        if(id == R.id.reportMenuItem){
+            Intent intent = new Intent(Intervals.this,Report.class);
+            intent.putExtra("intervalID",intervalID);
+            startActivity(intent);
+
+            return true;
+        }
+
+        if(id == R.id.ringtoneMenuItem){
+            resetEverything();
+            intervalsAdapter.resetTimes();
+            Intent loadRingtone = new Intent(RingtoneManager.ACTION_RINGTONE_PICKER);
+            loadRingtone.putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE,"Select alert tone");
+            loadRingtone.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true);
+            loadRingtone.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, true);
+            loadRingtone.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_NOTIFICATION);
+            loadRingtoneActivityLauncher.launch(loadRingtone);
+            return true;
+        }
+
+        if(id == R.id.loadIntervalMenuItem){
+            resetEverything();
+            intervalsAdapter.resetTimes();
+            Intent loadTimer = new Intent(Intervals.this,LoadInterval.class);
+            loadIntervalActivityLauncher.launch(loadTimer);
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
 
     /*@Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
